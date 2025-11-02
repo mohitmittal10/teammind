@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  teamId        String
+  name          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  team          Team      @relation(fields: [teamId], references: [id])
+  cards         KnowledgeCard[]
+  comments      Comment[]
+  likes         Like[]
+  
+  @@map("users")
+}
+
+model Team {
+  id            String    @id @default(cuid())
+  name          String    @unique
+  createdAt     DateTime  @default(now())
+  
+  users         User[]
+  cards         KnowledgeCard[]
+  
+  @@map("teams")
+}
+
+model KnowledgeCard {
+  id            String    @id @default(cuid())
+  title         String
+  content       String
+  tags          String[]  @default([])
+  relatedCards  String[]  @default([])
+  summary       String?
+  access        Access    @default(PUBLIC)
+  likes         Int       @default(0)
+  createdBy     String
+  teamId        String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  creator       User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  team          Team      @relation(fields: [teamId], references: [id])
+  comments      Comment[]
+  userLikes     Like[]
+  
+  @@map("knowledge_cards")
+}
+
+model Comment {
+  id            String    @id @default(cuid())
+  text          String
+  cardId        String
+  createdBy     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  card          KnowledgeCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  author        User          @relation(fields: [createdBy], references: [id])
+  
+  @@map("comments")
+}
+
+model Like {
+  id            String    @id @default(cuid())
+  userId        String
+  cardId        String
+  createdAt     DateTime  @default(now())
+  
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card          KnowledgeCard  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, cardId])
+  @@map("likes")
+}
+
+enum Access {
+  PUBLIC
+  PRIVATE
+}
