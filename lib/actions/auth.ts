@@ -29,7 +29,7 @@ export async function signup(formData: FormData) {
 
     const validated = signupSchema.safeParse(rawData)
     if (!validated.success) {
-      console.error('Validation failed:', validated.error.errors)
+      console.error('Validation failed:', validated.error.issues)
       return { error: 'Invalid input data' }
     }
 
