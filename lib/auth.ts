@@ -12,39 +12,35 @@ export const authOptions: NextAuthConfig = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        // Validate credentials exist
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email and password are required')
         }
 
-        // Find user in the database
+        const email = credentials.email as string
+        const password = credentials.password as string
+
         const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+          where: { email },
         })
 
-        // Validate user and password type
         if (!user || typeof user.password !== 'string') {
           throw new Error('Invalid credentials')
         }
 
-        // Compare passwords
-        const isPasswordValid = await bcrypt.compare(
-          String(credentials.password),
-          user.password
-        )
+        const isPasswordValid = await bcrypt.compare(password, user.password)
 
         if (!isPasswordValid) {
           throw new Error('Invalid credentials')
         }
 
-        // Return minimal user data to NextAuth
         return {
           id: user.id,
           email: user.email,
           name: user.name,
           teamId: user.teamId ?? null,
         }
-      },
+      }
+      ,
     }),
   ],
 
