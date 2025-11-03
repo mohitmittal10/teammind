@@ -82,3 +82,5 @@ export async function getUserLikes(userId: string): Promise<string[]> {
   return likes.map((like) => like.cardId)
 }
 
+
+

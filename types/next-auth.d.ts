@@ -6,22 +6,22 @@ declare module 'next-auth' {
       id: string
       email: string
       name?: string | null
-      teamId: string
-    }
+      teamId?: string | null // ✅ make optional — sometimes user may not belong to a team
+    } & DefaultSession['user']
   }
 
   interface User {
     id: string
     email: string
     name?: string | null
-    teamId: string
+    teamId?: string | null // ✅ optional to prevent type errors during signup or admin accounts
   }
 }
 
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string
-    teamId: string
+    teamId?: string | null // ✅ same reason as above
   }
 }
 
